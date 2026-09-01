@@ -13,7 +13,7 @@ you feel never moves the schedule, because confidence does not predict what you 
 ## Quickstart
 
 ```
-git clone https://github.com/YOUR-USERNAME/halflife.git
+git clone https://github.com/shahil1dn/halflife.git
 cd halflife
 ```
 
