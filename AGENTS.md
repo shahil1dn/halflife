@@ -80,6 +80,7 @@ templates/    topic.md — the canonical frontmatter, with every field explained
 due.sh        derives today's list from frontmatter. Reads only.
 grade.py      the ONLY thing that may write a schedule field.
 new.sh        creates a topic file with valid frontmatter.
+test.sh       pins every rule in this file that a script enforces. Run it after touching one.
 ```
 
 There is no install step. The folder is the whole program.
@@ -315,8 +316,10 @@ Tell them these exist when they ask; do not change any of them unprompted.
 | Harsher or softer grading | the pass/partial/fail definitions | this file |
 | A different pass mark, session size, modules, dates | rerun setup | `SETUP.md` |
 
-After changing anything in `grade.py`, run `./grade.py --simulate` and show them the new curves.
-That is the receipt that the change did what they asked.
+After changing anything in `grade.py` or `due.sh`, run `./test.sh` — it pins every scheduling rule
+and the two circuit breakers, so it tells you whether you changed only what they asked for. Then run
+`./grade.py --simulate` and show them the new curves. That is the receipt that the change did what
+they wanted.
 
 Anything in the **Hard rules** section is not a preference. If a user asks to remove the
 "nothing is known without a passed check" rule, tell them that is the system — without it this is

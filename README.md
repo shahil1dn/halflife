@@ -140,8 +140,11 @@ that follows it and can run shell commands should work.
 
 ## Contributing
 
-Issues and pull requests are welcome. If you are changing how grading or scheduling behaves, run
-`./grade.py --simulate` and include the before and after curves.
+Issues and pull requests are welcome. Run `./test.sh` before opening one — it covers the scripts
+end to end and takes a few seconds.
+
+If you are changing how grading or scheduling behaves, also run `./grade.py --simulate` and include
+the before and after curves, so the effect on the schedule is visible in the pull request.
 
 ## License
 
