@@ -1,4 +1,4 @@
-# Study tracker — agent operating protocol
+# halflife — agent operating protocol
 
 ## Start here. Every session, including this one.
 
