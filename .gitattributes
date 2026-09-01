@@ -1,0 +1,12 @@
+# Normalise line endings in the repository.
+* text=auto
+
+# Scripts must keep LF even on Windows. Git for Windows checks out CRLF by default,
+# and bash then fails on the carriage return with "env: bash\r: No such file or directory"
+# before a single line runs. This line is the whole reason Git Bash and WSL work here.
+*.sh text eol=lf
+*.py text eol=lf
+
+# Topic files are the data. Keep them LF so a record written on one machine
+# does not show up as an all-lines-changed diff on another.
+*.md text eol=lf

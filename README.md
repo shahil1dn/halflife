@@ -123,7 +123,11 @@ if you ask it to take your word instead. Remove that and this is a to-do list wi
 
 ## Requirements
 
-Bash and Python 3, both already present on macOS and Linux.
+Bash and Python 3.
+
+Both are already present on macOS and Linux. On Windows, use Git Bash (installed with Git for
+Windows, so you already have it if you can clone this) or WSL. The repository forces LF line
+endings for exactly this reason — Windows checkouts otherwise break bash before it runs a line.
 
 Plus a terminal coding agent — Claude Code or one of its equivalents. Built with Claude Code; the
 instructions live in `AGENTS.md`, the filename this class of tool reads by convention, so anything
