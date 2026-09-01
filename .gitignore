@@ -1,9 +1,28 @@
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python
 __pycache__/
 *.pyc
-.DS_Store
-.claude/
 
-# The reading shelf is the user's own course material — personal, often copyrighted.
+# Local agent state. This repo is meant to be driven by whichever agent you use,
+# and they all keep local settings and caches here. None of it belongs in the repo.
+.claude/
+.cursor/
+.codex/
+.gemini/
+.aider*
+
+# The reading shelf is your own course material — personal, often copyrighted.
 # Keep the folder, ignore the contents.
 materials/*
 !materials/.gitkeep
+
+# NOT ignored, deliberately:
+#   topics/*.md  — your study record. It is the reason to keep this in git.
+#   SETUP.md     — tracked so `git checkout SETUP.md` can restore the blank
+#                  questionnaire. It holds your profile after setup, so keep the
+#                  repo private if that matters to you.
