@@ -76,4 +76,5 @@ next_due: $next_due
 ## Log
 EOF
 
-echo "$file${next_due:+  (first test $next_due)}"
+# print the path relative to the folder, matching due.sh — the agent passes it straight to grade.py
+echo "topics/$slug-$topic.md${next_due:+  (first test $next_due)}"
