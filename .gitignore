@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+.claude/
+
+# The reading shelf is the user's own course material — personal, often copyrighted.
+# Keep the folder, ignore the contents.
+materials/*
+!materials/.gitkeep
