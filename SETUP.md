@@ -9,7 +9,7 @@ institution:       # optional. Helps the agent read your material in the right c
 goal:              # e.g. a First, 70%+, just pass, understand it properly
 pass_threshold:    # 50 | 70 | 80 | 100 — the mark that counts as a pass on SCORED work
 partial_band: 15   # a score this many points below the threshold counts as partial, not fail
-session_size:      # how many topics you want tested in one sitting, e.g. 5
+session_size:      # topics per sitting, e.g. 5 — or `ask` to be asked each session
 modules: []        # the labels used as `module:` on every topic
 key_dates: []      # exams and deadlines that matter, as "YYYY-MM-DD — what it is"
 ---
@@ -44,6 +44,8 @@ your answer to question 3. This is the threshold applied to **scored** work only
 quizzes, flashcard decks, anything that comes back as a mark out of something.
 
 **5. How many topics do you want in one sitting?** A realistic number for a normal day. The agent
-uses it to decide how much of a long due list to work through before stopping.
+uses it to decide how much of a long due list to work through before stopping. Answer `ask` instead
+of a number if it varies, and the agent will ask how much time you have at the start of each
+session.
 
 **6. Any dates that matter?** Exams, coursework deadlines, a resit. Say so if there are none.
