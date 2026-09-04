@@ -10,3 +10,13 @@
 # Topic files are the data. Keep them LF so a record written on one machine
 # does not show up as an all-lines-changed diff on another.
 *.md text eol=lf
+
+# Keep repository furniture out of the release archives. This affects `git archive` and the
+# zip and tarball GitHub attaches to a release. It does not affect a clone, which always
+# carries everything; the first-run step in AGENTS.md offers to clear these for a user who
+# is not going to change the tool.
+.github/            export-ignore
+CONTRIBUTING.md     export-ignore
+SECURITY.md         export-ignore
+.editorconfig       export-ignore
+.gitattributes      export-ignore
