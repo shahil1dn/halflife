@@ -42,10 +42,10 @@ back, run `git checkout SETUP.md`.
 Say `test me`. The agent runs `due.sh`, which reads the topic files and prints what is due:
 
 ```
-=== DUE TODAY (2026-09-01) — 1 ===
+=== DUE TODAY (2026-09-01): 1 ===
 MATH101      long-division                    [A] learning p:1 f:0  topics/math101-long-division.md
 
-=== TO LEARN / RELEARN (no date — your choice) — 1 ===
+=== TO LEARN / RELEARN (no date, your choice): 1 ===
 compilers    nfa-nondeterminism               [B] queued p:0 f:0  topics/compilers-nfa-nondeterminism.md
 ```
 

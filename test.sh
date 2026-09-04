@@ -24,8 +24,8 @@ TODAY="$(date +%F)"
 day() { date -v"$1"d +%F 2>/dev/null || date -d "$1 days" +%F; }   # day +3 / day -1
 
 case_() { CASE="$1"; }
-ok()   { PASSED=$((PASSED+1)); [ "$VERBOSE" = "-v" ] && printf '  ok   %s — %s\n' "$CASE" "$1"; return 0; }
-bad()  { FAILED=$((FAILED+1)); printf 'FAIL  %s — %s\n' "$CASE" "$1"; }
+ok()   { PASSED=$((PASSED+1)); [ "$VERBOSE" = "-v" ] && printf '  ok   %s: %s\n' "$CASE" "$1"; return 0; }
+bad()  { FAILED=$((FAILED+1)); printf 'FAIL  %s: %s\n' "$CASE" "$1"; }
 
 assert_has()  { printf '%s' "$1" | grep -qF -- "$2" && ok "contains '$2'" || bad "expected '$2' in: $1"; }
 assert_not()  { printf '%s' "$1" | grep -qF -- "$2" && bad "did NOT expect '$2' in: $1" || ok "lacks '$2'"; }
@@ -68,26 +68,26 @@ out="$(./due.sh)"; assert_has "$out" "no topics yet"; assert_exit $? 0
 reset; fixture backlog queued 0 0 0 ""
 case_ "queued topic goes to the backlog, not DUE"
 out="$(./due.sh)"
-assert_has "$out" "TO LEARN / RELEARN (no date — your choice) — 1"
-assert_has "$out" "DUE TODAY ($TODAY) — 0"
+assert_has "$out" "TO LEARN / RELEARN (no date, your choice): 1"
+assert_has "$out" "DUE TODAY ($TODAY): 0"
 
 reset; fixture pastdue learning 1 0 3 "$(day -1)"
 case_ "past date is due"
-assert_has "$(./due.sh)" "DUE TODAY ($TODAY) — 1"
+assert_has "$(./due.sh)" "DUE TODAY ($TODAY): 1"
 
 reset; fixture exactly learning 1 0 3 "$TODAY"
 case_ "due exactly today is due (boundary)"
-assert_has "$(./due.sh)" "DUE TODAY ($TODAY) — 1"
+assert_has "$(./due.sh)" "DUE TODAY ($TODAY): 1"
 
 reset; fixture tomorrow learning 1 0 3 "$(day +1)"
 case_ "due tomorrow is not due (boundary)"
-out="$(./due.sh)"; assert_has "$out" "DUE TODAY ($TODAY) — 0"
-assert_has "$(./due.sh all)" "SCHEDULED — 1"
+out="$(./due.sh)"; assert_has "$out" "DUE TODAY ($TODAY): 0"
+assert_has "$(./due.sh all)" "SCHEDULED: 1"
 
 reset; fixture sleepy dormant 4 0 120 "$(day +100)"
 case_ "dormant appears only under 'all'"
 assert_not "$(./due.sh)" "sleepy"
-assert_has "$(./due.sh all)" "DORMANT — 1"
+assert_has "$(./due.sh all)" "DORMANT: 1"
 
 reset; fixture done_ retired 6 0 365 "$(day +300)"
 case_ "retired hidden from due, shown in all"
@@ -118,7 +118,7 @@ assert_has "$out" "good"
 
 reset; fixture dropped learning 2 0 10 ""
 case_ "a passed topic with no date is forced due, not silently backlogged"
-assert_has "$(./due.sh)" "next_due missing or malformed — forced DUE"
+assert_has "$(./due.sh)" "next_due missing or malformed, forced DUE"
 
 # The discriminating case is a key ABSENT from the frontmatter but present in the body.
 # With a body line placed after a real key, `head -1` picks the real one either way, so that
@@ -179,7 +179,7 @@ assert_eq "$(fm f2 clean_passes)" "0"; assert_eq "$(fm f2 consec_fails)" "2"
 
 case_ "dropping to zero passes unschedules the topic"
 assert_eq "$(fm f2 interval)" "0"; assert_eq "$(fm f2 next_due)" ""
-assert_has "$(./due.sh)" "TO LEARN / RELEARN (no date — your choice) — 1"
+assert_has "$(./due.sh)" "TO LEARN / RELEARN (no date, your choice): 1"
 
 reset; fixture d1 learning 4 0 60 "$TODAY" 2.5
 case_ "interval >= 90 becomes dormant"
@@ -228,11 +228,11 @@ echo "== grade.py: writes and guards =="
 reset; fixture w queued 0 0 0 ""
 case_ "the log line records the grade, the date and the note"
 ./grade.py topics/w.md pass "named the common factor" >/dev/null
-assert_has "$(cat topics/w.md)" "- PASSED $TODAY — named the common factor"
+assert_has "$(cat topics/w.md)" "- PASSED $TODAY: named the common factor"
 ./grade.py topics/w.md fail "no method recalled" >/dev/null
-assert_has "$(cat topics/w.md)" "- MISSED $TODAY — no method recalled"
+assert_has "$(cat topics/w.md)" "- MISSED $TODAY: no method recalled"
 ./grade.py topics/w.md partial "half of it" >/dev/null
-assert_has "$(cat topics/w.md)" "- PARTIAL $TODAY — half of it"
+assert_has "$(cat topics/w.md)" "- PARTIAL $TODAY: half of it"
 
 case_ "last_checked and last_result are written"
 assert_eq "$(fm w last_result)" "partial"; assert_eq "$(fm w last_checked)" "$TODAY"
@@ -295,11 +295,11 @@ echo "== end to end =="
 reset
 case_ "create, pass, and see it move out of the backlog into the schedule"
 ./new.sh MOD lifecycle A "x" learn >/dev/null
-assert_has "$(./due.sh)" "TO LEARN / RELEARN (no date — your choice) — 1"
+assert_has "$(./due.sh)" "TO LEARN / RELEARN (no date, your choice): 1"
 ./grade.py topics/mod-lifecycle.md pass "n" >/dev/null
 out="$(./due.sh all)"
-assert_has "$out" "SCHEDULED — 1"
-assert_has "$out" "TO LEARN / RELEARN (no date — your choice) — 0"
+assert_has "$out" "SCHEDULED: 1"
+assert_has "$out" "TO LEARN / RELEARN (no date, your choice): 0"
 
 case_ "an easy topic reaches retired and leaves the daily list"
 for _ in 1 2 3 4 5 6; do ./grade.py topics/mod-lifecycle.md pass "n" >/dev/null; done

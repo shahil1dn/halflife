@@ -21,7 +21,7 @@ fm() { sed -n '/^---$/,/^---$/p' "$1" | grep -E "^$2:" | head -1 | sed -E "s/^$2
 
 shopt -s nullglob
 FILES=(topics/*.md)
-[ ${#FILES[@]} -eq 0 ] && { echo "no topics yet — create some with ./new.sh"; exit 0; }
+[ ${#FILES[@]} -eq 0 ] && { echo "no topics yet, create some with ./new.sh"; exit 0; }
 
 cmd="${1:-due}"
 
@@ -44,8 +44,8 @@ case "$cmd" in
         pool+=("$f")
       fi
     done
-    [ ${#pool[@]} -eq 0 ] && { echo "calib: nothing claimed as known yet — pool empty"; exit 0; }
-    echo "=== BLIND RE-TEST — run these in a FRESH session, no history ==="
+    [ ${#pool[@]} -eq 0 ] && { echo "calib: nothing claimed as known yet, pool empty"; exit 0; }
+    echo "=== BLIND RE-TEST: run these in a FRESH session, no history ==="
     echo "Give the tester ONLY the scope: line. Withhold the stored verdict."
     echo
     printf '%s\n' "${pool[@]}" | sort -R | head -3 | while read -r f; do
@@ -64,15 +64,15 @@ case "$cmd" in
 
       if [ -z "$st" ]; then
         # no readable status: -> the frontmatter is broken, not the schedule. Say so loudly.
-        due+=("$(printf '%-12s %-32s [%s] %s p:%s f:%s  %s' "$mod" "$top" "$var" "?" "$cp" "$cf" "$f")  !! frontmatter malformed — no readable status: field")
+        due+=("$(printf '%-12s %-32s [%s] %s p:%s f:%s  %s' "$mod" "$top" "$var" "?" "$cp" "$cf" "$f")  !! frontmatter malformed, no readable status: field")
         continue
       fi
 
       flag=""
       [ "$cf" -ge 2 ] 2>/dev/null && flag="
-      ** SCAFFOLD (${cf} consecutive fails) — drop a rung, no cold test this time"
+      ** SCAFFOLD (${cf} consecutive fails): drop a rung, no cold test this time"
       [ "$cf" -ge 4 ] 2>/dev/null && flag="
-      ** BLOCKED (${cf} consecutive fails) — scope: is too broad, rewrite it before retesting"
+      ** BLOCKED (${cf} consecutive fails), scope: is too broad, rewrite it before retesting"
 
       line="$(printf '%-12s %-32s [%s] %s p:%s f:%s  %s' "$mod" "$top" "$var" "$st" "$cp" "$cf" "$f")"
 
@@ -83,7 +83,7 @@ case "$cmd" in
         new+=("$line$flag")
       elif ! printf '%s' "$nd" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
         # once a topic HAS been passed, a missing date is a dropped write, not a backlog item
-        due+=("$line  !! next_due missing or malformed — forced DUE$flag")
+        due+=("$line  !! next_due missing or malformed, forced DUE$flag")
       elif [ ! "$nd" \> "$TODAY" ]; then
         due+=("$line$flag")
       elif [ "$st" = "dormant" ]; then
@@ -93,17 +93,17 @@ case "$cmd" in
       fi
     done
 
-    echo "=== DUE TODAY ($TODAY) — ${#due[@]} ==="
+    echo "=== DUE TODAY ($TODAY): ${#due[@]} ==="
     printf '%s\n' "${due[@]:-  (none)}"
-    echo; echo "=== TO LEARN / RELEARN (no date — your choice) — ${#new[@]} ==="
+    echo; echo "=== TO LEARN / RELEARN (no date, your choice): ${#new[@]} ==="
     printf '%s\n' "${new[@]:-  (none)}"
     if [ "$cmd" = "all" ]; then
-      echo; echo "=== SCHEDULED — ${#soon[@]} ==="
+      echo; echo "=== SCHEDULED: ${#soon[@]} ==="
       printf '%s\n' "${soon[@]:-  (none)}"
-      echo; echo "=== DORMANT — ${#later[@]} ==="
+      echo; echo "=== DORMANT: ${#later[@]} ==="
       printf '%s\n' "${later[@]:-  (none)}"
     fi
     ;;
 
-  *) echo "due.sh: unknown command '$cmd' — try: due | all | stats | calib" >&2; exit 1 ;;
+  *) echo "due.sh: unknown command '$cmd', try: due | all | stats | calib" >&2; exit 1 ;;
 esac

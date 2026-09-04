@@ -92,7 +92,7 @@ def main():
 
     print(f"{path}\n  {grade}: ease {ease}->{ne}  interval {interval}d->{ni}d  "
           f"passes {passes}->{np_}  consec_fails {cf}->{ncf}  status->{nst}  "
-          f"next_due {nd if nd else '(unscheduled — backlog)'}")
+          f"next_due {nd if nd else '(unscheduled, backlog)'}")
     if dry: return
 
     for k, v in [("ease", ne), ("interval", ni), ("clean_passes", np_),
@@ -100,7 +100,7 @@ def main():
                  ("last_checked", today), ("next_due", nd)]:
         s = fm_set(s, k, v)
     tag = {"pass": "PASSED", "partial": "PARTIAL", "fail": "MISSED"}[grade]
-    s = s.rstrip() + f"\n- {tag} {today} — {note}\n"
+    s = s.rstrip() + f"\n- {tag} {today}: {note}\n"
     open(path, "w", encoding="utf-8").write(s)
 
 main()

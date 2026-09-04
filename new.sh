@@ -53,7 +53,7 @@ fi
 
 slug="$(printf '%s' "$module" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
 file="$ROOT/topics/$slug-$topic.md"
-[ -e "$file" ] && { echo "new.sh: $file already exists — scope: is immutable, edit it only via the BLOCKED path" >&2; exit 1; }
+[ -e "$file" ] && { echo "new.sh: $file already exists, scope: is immutable, edit it only via the BLOCKED path" >&2; exit 1; }
 
 mkdir -p "$ROOT/topics"
 cat > "$file" <<EOF
@@ -75,7 +75,7 @@ next_due: $next_due
 # $topic
 
 ## Why it's here
-(one line — what made this worth tracking)
+(one line, what made this worth tracking)
 
 ## Log
 EOF
