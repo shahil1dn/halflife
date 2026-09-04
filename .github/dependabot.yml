@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # This project has no dependencies to update. The GitHub Actions pinned in
+  # .github/workflows are the one supply chain it does have, so they are the
+  # one thing worth watching.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"

@@ -150,11 +150,9 @@ that follows it and can run shell commands should work.
 
 ## Contributing
 
-Issues and pull requests are welcome. Run `./test.sh` before opening one — it covers the scripts
-end to end and takes a few seconds.
-
-If you are changing how grading or scheduling behaves, also run `./grade.py --simulate` and include
-the before and after curves, so the effect on the schedule is visible in the pull request.
+Issues and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) has what to run before
+opening one, the handful of rules that will get a change refused, and a section addressed to
+coding agents, since a fair number of pull requests now arrive from them.
 
 ## License
 

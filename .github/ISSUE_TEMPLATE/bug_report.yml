@@ -1,0 +1,48 @@
+name: Bug report
+description: Something behaves differently from what the README or AGENTS.md says
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce it
+      description: >
+        The commands you ran, in order. A topic file that triggers it is better than a
+        description of one. Take out anything private first.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: due-output
+    attributes:
+      label: What ./due.sh printed
+      render: shell
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 26, Ubuntu 24.04, Windows 11 with Git Bash
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: bash and Python versions
+      description: Output of `bash --version | head -1` and `python3 -V`.
+      placeholder: GNU bash 3.2.57, Python 3.13.1
+    validations:
+      required: true
+  - type: checkboxes
+    id: suite
+    attributes:
+      label: The suite
+      options:
+        - label: I ran ./test.sh and it passed
+        - label: I ran ./test.sh and it failed (paste the failing lines above)
