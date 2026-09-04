@@ -4,6 +4,10 @@
 #
 #   ./test.sh            run everything
 #   ./test.sh -v         also print each passing assertion
+# ok() ends in an explicit `return 0` and bad() ends in printf, so both always succeed.
+# That makes `assertion && ok || bad` safe throughout this file: the bad branch cannot
+# fire after a passing assertion.
+# shellcheck disable=SC2015
 set -uo pipefail        # deliberately NOT -e: a failing assertion must not stop the run
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,7 +16,9 @@ PASSED=0; FAILED=0; CASE="(none)"
 
 WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
 cp "$ROOT/due.sh" "$ROOT/grade.py" "$ROOT/new.sh" "$WORK/"
-cd "$WORK"
+# || exit is load-bearing: without it a failed cd runs every assertion against the real
+# topics/ directory instead of the sandbox copy.
+cd "$WORK" || exit 1
 
 TODAY="$(date +%F)"
 day() { date -v"$1"d +%F 2>/dev/null || date -d "$1 days" +%F; }   # day +3 / day -1
@@ -250,8 +256,8 @@ reset
 case_ "a created topic has every field the schema requires"
 ./new.sh MATH101 long-division A "divide a 4-digit number by a 2-digit one" >/dev/null
 for k in module topic scope variant status clean_passes ease interval consec_fails last_result next_due; do
-  [ -n "$(sed -n '/^---$/,/^---$/p' topics/math101-long-division.md | grep -c "^$k:")" ] \
-    && grep -q "^$k:" topics/math101-long-division.md && ok "has $k:" || bad "missing $k:"
+  sed -n '/^---$/,/^---$/p' topics/math101-long-division.md | grep -q "^$k:" \
+    && ok "has $k:" || bad "missing $k:"
 done
 assert_eq "$(fm math101-long-division status)" "queued"
 
