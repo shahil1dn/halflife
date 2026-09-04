@@ -76,7 +76,9 @@ def main():
     note = sys.argv[3] if len(sys.argv) > 3 and not sys.argv[3].startswith("--") else ""
     dry = "--dry-run" in sys.argv
 
-    s = open(path).read()
+    # encoding is explicit on both ends: Python defaults to the platform locale, which on
+    # Windows is cp1252, and a UTF-8 topic file round-tripped through it comes back corrupted.
+    s = open(path, encoding="utf-8").read()
     ease = float(fm_get(s, "ease", EASE_START) or EASE_START)
     interval = int(fm_get(s, "interval", 0) or 0)
     passes = int(fm_get(s, "clean_passes", 0) or 0)
@@ -99,6 +101,6 @@ def main():
         s = fm_set(s, k, v)
     tag = {"pass": "PASSED", "partial": "PARTIAL", "fail": "MISSED"}[grade]
     s = s.rstrip() + f"\n- {tag} {today} — {note}\n"
-    open(path, "w").write(s)
+    open(path, "w", encoding="utf-8").write(s)
 
 main()

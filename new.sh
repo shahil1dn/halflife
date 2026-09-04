@@ -19,6 +19,10 @@
 #
 # Example:
 #   ./new.sh MATH101 fraction-simplify A "simplify any fraction to lowest terms" known
+# The `[ test ] && [ test ] || { usage; }` shape below is a genuine if-then-else: both
+# left-hand operands are tests rather than actions, so the right-hand branch only runs
+# when a test actually fails.
+# shellcheck disable=SC2015
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
