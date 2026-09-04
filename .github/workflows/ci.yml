@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # shellcheck is preinstalled on the Ubuntu runner. Printing the version keeps a
+      # future runner image change from looking like a code failure.
+      - name: shellcheck version
+        run: shellcheck --version
+
+      # Catches unquoted expansions, silent command failures, and the A && B || C traps
+      # that a passing test suite cannot see.
+      - name: Lint shell scripts
+        run: shellcheck due.sh new.sh test.sh
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      # grade.py is stdlib only, so there is nothing to install and nothing to pin.
+      # compileall is the whole check: it fails on a syntax error before any test runs.
+      - name: Byte-compile the scheduler
+        run: python -m compileall -q grade.py
+
+  test:
+    name: Tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      # The macOS leg is the one that earns its keep: it ships bash 3.2 and BSD date,
+      # so it proves the portability the README claims instead of asserting it.
+      - name: Record the shell and date implementation
+        run: |
+          bash --version | head -1
+          date -v-1d +%F 2>/dev/null && echo "date: BSD" || echo "date: GNU"
+
+      - name: Run the suite
+        run: ./test.sh
+
+  gitbash:
+    name: Tests (Windows, Git Bash)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      # The README tells Windows users to run this under Git Bash, so that claim gets
+      # tested. The scripts reach Python through a `#!/usr/bin/env python3` shebang,
+      # and the Windows runner provides `python`, so the name is bridged here rather
+      # than changed in the scripts, where it would break macOS and Linux.
+      - name: Provide python3 on PATH
+        shell: bash
+        run: |
+          if ! command -v python3 >/dev/null; then
+            mkdir -p "$HOME/bin"
+            printf '#!/usr/bin/env bash\nexec python "$@"\n' > "$HOME/bin/python3"
+            chmod +x "$HOME/bin/python3"
+            echo "$HOME/bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Run the suite
+        shell: bash
+        run: ./test.sh
