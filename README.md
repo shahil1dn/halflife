@@ -1,5 +1,8 @@
 # halflife
 
+[![CI](https://github.com/shahil1dn/halflife/actions/workflows/ci.yml/badge.svg)](https://github.com/shahil1dn/halflife/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Spaced-repetition study tracking where your coding agent runs the test and a script owns the schedule.
 
 It is a folder of markdown files and three small scripts. There is no app, no account, no UI and
@@ -128,6 +131,9 @@ Bash and Python 3.
 Both are already present on macOS and Linux. On Windows, use Git Bash (installed with Git for
 Windows, so you already have it if you can clone this) or WSL. The repository forces LF line
 endings for exactly this reason — Windows checkouts otherwise break bash before it runs a line.
+
+The test suite runs on Ubuntu, macOS and Windows under Git Bash on every push, so those three
+are tested rather than assumed. The badge above links to the runs.
 
 Plus a terminal coding agent — Claude Code or one of its equivalents. Built with Claude Code; the
 instructions live in `AGENTS.md`, the filename this class of tool reads by convention, so anything
