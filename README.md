@@ -3,43 +3,57 @@
 [![CI](https://github.com/shahil1dn/halflife/actions/workflows/ci.yml/badge.svg)](https://github.com/shahil1dn/halflife/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Spaced-repetition study tracking where your coding agent runs the test and a script owns the schedule.
+**A study tool where an AI agent tests you, and a script decides when you see each topic again.**
 
-It is a folder of markdown files and three small scripts. There is no app, no account, no UI and
-nothing to install. You point a terminal coding agent at the folder — Claude Code or similar — and
-it tests you, judges the answer against a bar you wrote in advance, and records the result. Passing
-pushes a topic further away, failing drags it back.
+Most AI study tools let the model decide whether you know something. That is the weak spot: a model
+can be talked round, and so can you. halflife splits the job in two:
 
-The part that makes it work: **nothing counts as known until you pass a test on it.** How confident
-you feel never moves the schedule, because confidence does not predict what you will remember.
+- **The agent tests.** It quizzes you closed book against a pass bar you wrote in advance, then
+  grades the answer pass, partial or fail.
+- **A script schedules.** That one word is the agent's only say. A small Python script works out
+  every review date from it, so nothing said in the chat can move a date.
 
-## Quickstart
+Nothing counts as known until you pass a test on it. Feeling confident never changes the schedule,
+because confidence is a poor guide to what you will remember.
+
+It is a folder of markdown files and three small scripts. No app, no account, nothing to install.
+
+## Getting started
 
 ```
 git clone https://github.com/shahil1dn/halflife.git
 cd halflife
 ```
 
-Open your coding agent in that folder and paste this:
+Open a terminal coding agent (Claude Code or similar) in the folder and say:
 
 ```
 read AGENTS.md and set me up
 ```
 
-The agent explains how the tool works, then asks about your course, your subjects, what mark counts
-as a pass, how long a session should be, and any exam dates. It writes those answers into
-`SETUP.md` and reads them at the start of every session afterwards.
+The agent explains how the tool works, then asks about:
 
-Then it writes your first topics. For each one it asks whether you already know it, learned it
-recently, or have never learned it. That decides whether the first test is a week away, two days
-away, or has no date at all and waits in the backlog.
+- your course and subjects
+- the mark that counts as a pass
+- how long a session should be
+- any exam dates
 
-`SETUP.md` ships as a questionnaire and is rewritten in place during setup. To get the blank one
-back, run `git checkout SETUP.md`.
+It saves your answers in `SETUP.md` and reads them at the start of every session.
 
-## A day of use
+Next it helps you add your first topics. For each one it asks how well you know it already:
 
-Say `test me`. The agent runs `due.sh`, which reads the topic files and prints what is due:
+| You say | First test |
+|---|---|
+| I know it well | in 7 days |
+| I learned it recently | in 2 days |
+| I have never learned it | no date; it waits in the backlog until you choose to learn it |
+
+`SETUP.md` starts as a blank questionnaire and is filled in during setup. To reset it, run
+`git checkout SETUP.md`.
+
+## A normal session
+
+Say `test me`. The agent runs `due.sh`, which lists what is due today:
 
 ```
 === DUE TODAY (2026-09-01): 1 ===
@@ -49,34 +63,36 @@ MATH101      long-division                    [A] learning p:1 f:0  topics/math1
 compilers    nfa-nondeterminism               [B] queued p:0 f:0  topics/compilers-nfa-nondeterminism.md
 ```
 
-It then tests you on the due topic, closed book, against that topic's `scope:` line — one sentence
-written when the topic was created, naming exactly what counts as knowing it. You answer in the
-chat. It grades pass, partial or fail, and records it:
+Every topic has a `scope:` line, written when the topic was created, that says exactly what knowing
+it means. The agent tests you against that line with no notes, you answer in the chat, and it
+records the grade:
 
 ```
 topics/math101-long-division.md
   pass: ease 2.15->2.3  interval 15d->34d  passes 1->2  consec_fails 0->0  status->learning  next_due 2026-10-05
 ```
 
-That topic was passed once before, so the gap widens from 15 days to 34. A partial would have halved
-it; a fail would have sent it back to tomorrow. Hence the name: everything you know has a half-life,
-and the point of the tool is to keep extending it.
+This topic had been passed once before, so the gap grew from 15 days to 34. A partial would have
+halved the gap, and a fail would have brought it back to tomorrow.
 
-If a topic has never been passed, or you have failed it twice, the agent teaches instead of testing:
-worked example, then a shuffled-lines version, then fill-in-the-blanks, then a fresh problem.
+That is where the name comes from: everything you know has a half-life, and the tool's job is to keep
+making it longer.
+
+If you have never passed a topic, or have just failed it twice, the agent teaches it instead of
+testing it. It shows a worked example, then the same solution with its lines shuffled for you to
+reorder, then a version with blanks to fill in, then a fresh problem.
 
 ## How the schedule works
 
-The agent's only input is one word. Every date after that is computed by `grade.py`, so the schedule
-cannot be talked into going easy on you.
+The agent gives `grade.py` one word. The script does the rest.
 
-| Grade | Effect |
+| Grade | What happens to the gap before the next test |
 |---|---|
-| pass | first pass 3 days, then 10, then the interval multiplies by an ease factor, capped at a year |
-| partial | interval halves |
-| fail | back to 1 day, or back to the undated backlog if it drops to zero passes |
+| pass | at least 3 days after the first pass and 10 after the second; after that it grows by a multiplier (the "ease"), up to one year |
+| partial | halves |
+| fail | drops to 1 day, or back to the undated backlog if the topic no longer has any passes |
 
-A topic moves through four states, and the interval decides which:
+Each topic moves through four stages as its gap grows:
 
 ```
   backlog  ──pass──>  learning  ──pass──>  dormant  ──pass──>  retired
@@ -86,28 +102,30 @@ A topic moves through four states, and the interval decides which:
                     any fail returns it to 1 day
 ```
 
-Topics leave. There is no review queue that grows forever.
+Topics you know well retire, so the review pile does not grow forever.
 
-Two circuit breakers are printed before a session starts, so they cannot be argued away mid-session.
-Fail the same topic twice and the agent is told to teach rather than test. Fail it four times and it
-is told the topic is too big and must be rewritten smaller.
+Two safety rules are printed before each session starts, so they cannot be argued away halfway
+through:
+
+- **Fail a topic twice in a row** and the agent is told to teach it, not test it.
+- **Fail it four times in a row** and the agent is told the topic is too big and must be split into
+  smaller ones.
 
 ## What is in the folder
 
 ```
-AGENTS.md      the agent's operating rules. The only place the rules live
-SETUP.md       your profile: subjects, pass mark, session size, key dates
+AGENTS.md      the agent's rules. This is the only place they live
+SETUP.md       your profile: subjects, pass mark, session length, key dates
 topics/        one markdown file per thing you are learning. This is the database
-materials/     optional: your own slides, PDFs and notes. No sorting needed
-due.sh         prints what is due today
-grade.py       records a result and computes the next review date
-new.sh         creates a topic
+materials/     optional: your own slides, PDFs and notes, in any order
+due.sh         lists what is due today
+grade.py       records a grade and works out the next review date
+new.sh         creates a new topic
 ```
 
-## Customising it
+## Changing how it works
 
-Ask the agent. It knows what is adjustable and where each setting lives, so you can say things in
-plain English and it will make the change:
+Ask the agent in plain English. It knows which settings exist and where they live:
 
 ```
 make the reviews come back sooner, I am forgetting things between them
@@ -116,43 +134,41 @@ be harsher, I am getting passes I do not deserve
 stop retiring things, I want everything to come back eventually
 ```
 
-Review intervals, how quickly topics retire, how many fails before the agent switches from testing
-to teaching, how you get taught, and your pass mark are all settings. After changing anything that
-affects the schedule, the agent shows you the before and after curves so you can see what you
-actually changed.
+You can change the review gaps, when topics retire, how many fails it takes before the agent starts
+teaching, how it teaches, and your pass mark. After any change to the schedule, the agent shows you
+the old and new review curves side by side so you can see what you actually changed.
 
-One part is not a setting. Nothing counts as known without a passed test, and the agent will say so
-if you ask it to take your word instead. Remove that and this is a to-do list with dates on it.
+One rule is not a setting: nothing counts as known without a passed test. If you ask the agent to
+take your word for it instead, it will point you back to this rule. Without it, this is just a
+to-do list with dates.
 
 ## Requirements
 
-Bash and Python 3.
+- Bash and Python 3. Both come with macOS and Linux. On Windows, use Git Bash (it comes with Git for
+  Windows) or WSL.
+- A terminal coding agent that can run shell commands. halflife was built with Claude Code. Its
+  rules live in `AGENTS.md`, the file most of these agents read by default, so others should work
+  too.
 
-Both are already present on macOS and Linux. On Windows, use Git Bash (installed with Git for
-Windows, so you already have it if you can clone this) or WSL. The repository forces LF line
-endings for exactly this reason — Windows checkouts otherwise break bash before it runs a line.
-
-The test suite runs on Ubuntu, macOS and Windows under Git Bash on every push, so those three
-are tested rather than assumed. The badge above links to the runs.
-
-Plus a terminal coding agent — Claude Code or one of its equivalents. Built with Claude Code; the
-instructions live in `AGENTS.md`, the filename this class of tool reads by convention, so anything
-that follows it and can run shell commands should work.
+The tests run on Ubuntu, macOS and Windows (Git Bash) on every push; the CI badge above links to the
+results. The repository forces Unix line endings, because Windows line endings stop the bash scripts
+from running at all.
 
 ## Limits
 
-- The quality of the testing depends on the agent you point at it.
-- No sync, no mobile app, no notifications. It runs when you open it.
-- Topic files are plain markdown you can edit or break by hand. Keep them in git.
-- The interval numbers are a reasonable bet, not a proven optimum. No research gives a schedule for
-  indefinite retention. They err long, because a gap that is too long is cheaper than one that is
-  too short.
+- The tests are only as good as the agent giving them.
+- No sync, no mobile app, no reminders. It only runs when you open it.
+- Topic files are plain markdown, so you can edit them by hand and also break them by hand. Keep
+  them in git.
+- The review gaps are a sensible guess, not a proven best. No research gives an ideal schedule for
+  remembering something forever. The gaps lean long on purpose: a gap that is a bit too long costs
+  less than one that is too short.
 
 ## Contributing
 
-Issues and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) has what to run before
-opening one, the handful of rules that will get a change refused, and a section addressed to
-coding agents, since a fair number of pull requests now arrive from them.
+Issues and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers what to run before
+you open one, the few rules that will get a change turned down, and a section for coding agents,
+since many pull requests now come from them.
 
 ## License
 
